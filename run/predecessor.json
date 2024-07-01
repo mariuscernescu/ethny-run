@@ -1,0 +1,7 @@
+{
+  "msg": [
+    "Session deserialization failed",
+    "Invalid session path '': Name cannot be empty"
+  ],
+  "cas_version": "5.8.0 (2023-06-08 15:13:27)"
+}

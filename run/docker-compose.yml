@@ -1,0 +1,77 @@
+version: '3.2'
+services:
+  las:
+    container_name: las
+    privileged: true
+    image: localhost:5001/etny-las
+    entrypoint: "/las_entrypoint.sh"
+    command: "/usr/local/bin/las"
+    devices:
+      - "/dev/sgx_enclave:/dev/sgx_enclave"
+    restart: on-failure
+    ports:
+      - target: 18766
+        published: 18766
+        protocol: tcp
+        mode: host
+
+  etny-securelock:
+    container_name: etny-securelock
+    privileged: true
+    image: localhost:5001/etny-securelock
+    entrypoint: ""
+    command: [ "/usr/local/bin/node", "/etny-securelock/securelock.js" ]
+    environment:
+      - SCONE_CAS_ADDR=scone-cas.cf
+      - SCONE_LAS_ADDR=las
+      - SCONE_CONFIG_ID=ENCLAVE_NAME_SECURELOCK_V3_LOCAL/application
+      - SCONE_HEAP=1024M
+      - SCONE_LOG=DEBUG
+      - SCONE_ALLOW_DLOPEN=1
+      - SCONE_EXTENSIONS_PATH=/lib/libbinary-fs.so
+    restart: on-failure:5
+    devices:
+      - "/dev/sgx_enclave:/dev/sgx_enclave"
+    depends_on:
+      - las
+
+  etny-trustedzone:
+    container_name: etny-trustedzone
+    privileged: true
+    image: localhost:5001/etny-trustedzone
+    entrypoint: ""
+    command: [ "/usr/local/bin/node", "/etny-trustedzone/trustedzone.js" ]
+    environment:
+      - SCONE_CAS_ADDR=scone-cas.cf
+      - SCONE_LAS_ADDR=las
+      - SCONE_CONFIG_ID=/application
+      - SCONE_HEAP=256M
+      - SCONE_LOG=DEBUG
+      - SCONE_ALLOW_DLOPEN=1
+      - SCONE_EXTENSIONS_PATH=/lib/libbinary-fs.so
+    restart: on-failure:5
+    devices:
+      - "/dev/sgx_enclave:/dev/sgx_enclave"
+    depends_on:
+      - las
+
+  etny-validator:
+    container_name: etny-validator
+    privileged: true
+    image: localhost:5001/etny-validator
+    entrypoint: ""
+    command: [ "/usr/local/bin/node", "/etny-validator/validator.js" ]
+    environment:
+      - SCONE_CAS_ADDR=scone-cas.cf
+      - SCONE_LAS_ADDR=las
+      - SCONE_CONFIG_ID=/application
+      - SCONE_HEAP=256M
+      - SCONE_LOG=DEBUG
+      - SCONE_ALLOW_DLOPEN=1
+      - SCONE_EXTENSIONS_PATH=/lib/libbinary-fs.so
+    restart: on-failure:5
+    devices:
+      - "/dev/sgx_enclave:/dev/sgx_enclave"
+    depends_on:
+      - las
+
