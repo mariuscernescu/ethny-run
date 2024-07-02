@@ -1,6 +1,6 @@
 name: ENCLAVE_NAME_SECURELOCK_V3_LOCAL
 version: "0.3"
-# predecessor: EMPTY
+__PREDECESSOR__
 
 security:
   attestation:

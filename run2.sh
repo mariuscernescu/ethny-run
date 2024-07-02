@@ -65,7 +65,7 @@ if [ ! -f etny-securelock-test.yaml.tpl ]; then
 fi
 
 if [ "${PREDECESSOR_HASH_SECURELOCK}" = "EMPTY" ]; then
-    sed -e "s|__PREDECESSOR__|# predecessor: ${PREDECESSOR_HASH_SECURELOCK}|g" \
+    sed -e "s|__PREDECESSOR__ |#predecessor: ${PREDECESSOR_HASH_SECURELOCK}|g" \
         -e "s|__MRENCLAVE__|${MRENCLAVE_SECURELOCK}|g" \
         -e "s|__ENCLAVE_NAME__|${ENCLAVE_NAME_SECURELOCK}|g" \
         etny-securelock-test.yaml.tpl > etny-securelock-test.yaml
@@ -158,8 +158,16 @@ for file in docker-compose.yml docker-compose-final.yml; do
     echo
 done
 
+
+
+
 # Get PUBLIC_KEY for SECURELOCK
 export PUBLIC_KEY_SECURELOCK_RES=$(docker-compose run etny-securelock | grep -v Creating | grep -v Pulling | grep -v latest | grep -v Digest | sed 's/.*PUBLIC_KEY:\s*//' | tr -d '\r')
+# 
+# [+] Running 1/0
+#  ✔ Container las  Started                                                                                                                                      0.0s
+# [SCONE|WARN] tools/starter/main.c:553:enclave_create(): Enclave is signed to run in production mode. Environment variables affecting enclave measurement will be ignored
+# [SCONE|FATAL] tools/starter/main.c:603:enclave_create(): Could not create enclave builder: Libsgx error: Cannot run production enclave in simulation mode
 export CERTIFICATE_CONTENT_SECURELOCK=$(echo "${PUBLIC_KEY_SECURELOCK_RES}" | sed -n '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/p' | sed -e '/-----BEGIN CERTIFICATE-----/d' -e '/-----END CERTIFICATE-----/d')
 if [ -z "${CERTIFICATE_CONTENT_SECURELOCK}" ]; then
   echo "ERROR! PUBLIC_KEY_SECURELOCK not found"
@@ -187,19 +195,19 @@ echo "Listing certificate PUBLIC_KEY_TRUSTEDZONE:"
 cat certificate.trustedzone.crt
 
 echo "**** Started ipfs ****"
-if [ -f ipfs.sh ]; then
-    chmod +x ipfs.sh
-    ./ipfs.sh
-else
-    echo "Warning: ipfs.sh not found. Skipping IPFS setup."
-fi
-echo "**** Finished ipfs ****"
+# if [ -f ipfs.sh ]; then
+#     chmod +x ipfs.sh
+#     ./ipfs.sh
+# else
+#     echo "Warning: ipfs.sh not found. Skipping IPFS setup."
+# fi
+# echo "**** Finished ipfs ****"
 
-echo "Adding certificates for SECURELOCK and TRUSTEDZONE into IMAGE REGISTRY smart contract..."
-if [ -f image_registry_runner.py ]; then
-    python3 image_registry_runner.py
-else
-    echo "Warning: image_registry_runner.py not found. Skipping certificate addition to IMAGE REGISTRY smart contract."
-fi
+# echo "Adding certificates for SECURELOCK and TRUSTEDZONE into IMAGE REGISTRY smart contract..."
+# if [ -f image_registry_runner.py ]; then
+#     python3 image_registry_runner.py
+# else
+#     echo "Warning: image_registry_runner.py not found. Skipping certificate addition to IMAGE REGISTRY smart contract."
+# fi
 
-echo "Script completed successfully."
+# echo "Script completed successfully."
